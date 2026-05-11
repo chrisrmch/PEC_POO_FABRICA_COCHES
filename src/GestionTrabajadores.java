@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class GestionTrabajadores
@@ -24,8 +25,9 @@ public class GestionTrabajadores
 
     public Trabajador buscarPorDni(String dni)
     {
-        for (int i = 0; i < trabajadores.size(); i++) {
-            Trabajador trabajador = trabajadores.get(i);
+        Iterator<Trabajador> iterador = trabajadores.iterator();
+        while (iterador.hasNext()) {
+            Trabajador trabajador = iterador.next();
             if (trabajador.getDni().equalsIgnoreCase(dni)) {
                 return trabajador;
             }
@@ -63,8 +65,9 @@ public class GestionTrabajadores
         List<Trabajador> coincidencias = new ArrayList<Trabajador>();
         String textoNormalizado = texto.toLowerCase();
 
-        for (int i = 0; i < trabajadores.size(); i++) {
-            Trabajador trabajador = trabajadores.get(i);
+        Iterator<Trabajador> iterador = trabajadores.iterator();
+        while (iterador.hasNext()) {
+            Trabajador trabajador = iterador.next();
             String nombreCompleto = trabajador.getNombreCompleto().toLowerCase();
             if (nombreCompleto.contains(textoNormalizado)) {
                 coincidencias.add(trabajador);
@@ -79,8 +82,9 @@ public class GestionTrabajadores
         List<Trabajador> coincidencias = new ArrayList<Trabajador>();
         String puestoNormalizado = puesto.toLowerCase();
 
-        for (int i = 0; i < trabajadores.size(); i++) {
-            Trabajador trabajador = trabajadores.get(i);
+        Iterator<Trabajador> iterador = trabajadores.iterator();
+        while (iterador.hasNext()) {
+            Trabajador trabajador = iterador.next();
             if (trabajador.getPuesto().toLowerCase().contains(puestoNormalizado)) {
                 coincidencias.add(trabajador);
             }
@@ -93,8 +97,9 @@ public class GestionTrabajadores
     {
         List<Operario> operarios = new ArrayList<Operario>();
 
-        for (int i = 0; i < trabajadores.size(); i++) {
-            Trabajador trabajador = trabajadores.get(i);
+        Iterator<Trabajador> iterador = trabajadores.iterator();
+        while (iterador.hasNext()) {
+            Trabajador trabajador = iterador.next();
             if (trabajador instanceof Operario) {
                 operarios.add((Operario) trabajador);
             }

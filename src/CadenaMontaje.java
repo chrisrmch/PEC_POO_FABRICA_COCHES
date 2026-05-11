@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class CadenaMontaje implements Sujeto
+public abstract class CadenaMontaje implements Observable
 {
     private String codigo;
     private String especialidad;
@@ -12,7 +12,7 @@ public abstract class CadenaMontaje implements Sujeto
     private String faseActual;
     private Componente componenteActual;
     private int contadorVehiculosFabricados;
-    private List<Observador> observadores;
+    private List<Observer> observadores;
 
     public CadenaMontaje(String codigo, String especialidad)
     {
@@ -20,7 +20,7 @@ public abstract class CadenaMontaje implements Sujeto
         this.especialidad = especialidad;
         this.faseActual = "Inactiva";
         this.contadorVehiculosFabricados = 0;
-        this.observadores = new ArrayList<Observador>();
+        this.observadores = new ArrayList<Observer>();
     }
 
     public String getCodigo()
@@ -124,16 +124,16 @@ public abstract class CadenaMontaje implements Sujeto
         notificarObservadores();
     }
 
-    public void registrarObservador(Observador observador)
+    public void registrarObservador(Observer observer)
     {
-        if (observador != null && !observadores.contains(observador)) {
-            observadores.add(observador);
+        if (observer != null && !observadores.contains(observer)) {
+            observadores.add(observer);
         }
     }
 
-    public void eliminarObservador(Observador observador)
+    public void eliminarObservador(Observer observer)
     {
-        observadores.remove(observador);
+        observadores.remove(observer);
     }
 
     public void notificarObservadores()

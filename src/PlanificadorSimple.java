@@ -28,7 +28,7 @@ public class PlanificadorSimple
             return bitacora;
         }
 
-        List<ProcesoProduccionSimple> procesosActivos = new ArrayList<ProcesoProduccionSimple>();
+        List<ProcesoActivo> procesosActivos = new ArrayList<ProcesoActivo>();
         int segundoActual = 1;
 
         while (hayPedidosPendientes(pedidos) || !procesosActivos.isEmpty()) {
@@ -39,9 +39,9 @@ public class PlanificadorSimple
 
             bitacora.add("Segundo " + segundoActual + ":");
 
-            List<ProcesoProduccionSimple> finalizados = new ArrayList<ProcesoProduccionSimple>();
+            List<ProcesoActivo> finalizados = new ArrayList<ProcesoActivo>();
             for (int i = 0; i < procesosActivos.size(); i++) {
-                ProcesoProduccionSimple proceso = procesosActivos.get(i);
+                ProcesoActivo proceso = procesosActivos.get(i);
                 Operario operario = proceso.getOperarioActual();
 
                 bitacora.add("  Cadena " + proceso.getCadena().getCodigo()
@@ -76,7 +76,7 @@ public class PlanificadorSimple
     }
 
     private void iniciarProcesosDisponibles(List<PedidoProduccionSimple> pedidos,
-                                            List<ProcesoProduccionSimple> procesosActivos,
+                                            List<ProcesoActivo> procesosActivos,
                                             List<Operario> operariosDisponibles,
                                             List<String> bitacora)
     {
@@ -87,23 +87,32 @@ public class PlanificadorSimple
                 continue;
             }
 
-            LoteMontaje loteMontaje = fabrica.prepararLoteMontaje(
-                pedido.getCadena(), pedido.getCodigoChasis(), pedido.getCodigoMotor(),
-                pedido.getCodigoTapiceria(), pedido.getCodigoRueda()
-            );
-
-            if (loteMontaje == null) {
+            if (!fabrica.puedePrepararMontaje(pedido.getCadena(), pedido.getCodigoChasis(),
+                                              pedido.getCodigoMotor(), pedido.getCodigoTapiceria(),
+                                              pedido.getCodigoRueda())) {
                 bitacora.add("No se puede iniciar el pedido " + pedido.getDescripcionPedido()
                              + " por falta de stock o incompatibilidad.");
                 pedido.cancelarPendientes();
                 continue;
             }
 
+            String codigoCadena = pedido.getCadena().getCodigo();
+            Chasis chasis = fabrica.prepararChasisParaMontaje(pedido.getCodigoChasis(), codigoCadena);
+            Motor motor = fabrica.prepararMotorParaMontaje(pedido.getCodigoMotor(), codigoCadena);
+            Tapiceria tapiceria = fabrica.prepararTapiceriaParaMontaje(pedido.getCodigoTapiceria(), codigoCadena);
+            Rueda rueda = fabrica.prepararRuedaParaMontaje(pedido.getCodigoRueda(), codigoCadena);
+
+            if (chasis == null || motor == null || tapiceria == null || rueda == null) {
+                bitacora.add("No se puede iniciar el pedido " + pedido.getDescripcionPedido()
+                             + " porque no se han podido reservar sus componentes.");
+                pedido.cancelarPendientes();
+                continue;
+            }
+
             pedido.consumirUnidadPendiente();
             Operario[] operariosAsignados = seleccionarOperariosAleatorios(operariosDisponibles);
-            procesosActivos.add(new ProcesoProduccionSimple(
-                pedido.getCadena(), loteMontaje, operariosAsignados
-            ));
+            procesosActivos.add(new ProcesoActivo(pedido.getCadena(), chasis, motor, tapiceria,
+                                                  rueda, operariosAsignados));
 
             bitacora.add("Pedido iniciado en cadena " + pedido.getCadena().getCodigo()
                          + " con operarios aleatorios para las fases.");
@@ -132,7 +141,7 @@ public class PlanificadorSimple
         return false;
     }
 
-    private boolean existeProcesoActivoParaCadena(List<ProcesoProduccionSimple> procesosActivos,
+    private boolean existeProcesoActivoParaCadena(List<ProcesoActivo> procesosActivos,
                                                   PedidoProduccionSimple pedido)
     {
         for (int i = 0; i < procesosActivos.size(); i++) {
@@ -141,6 +150,100 @@ public class PlanificadorSimple
             }
         }
         return false;
+    }
+
+    private class ProcesoActivo
+    {
+        private static final String[] FASES = {"Chasis", "Motor", "Tapiceria", "Ruedas"};
+
+        private CadenaMontaje cadena;
+        private Chasis chasis;
+        private Motor motor;
+        private Tapiceria tapiceria;
+        private Rueda rueda;
+        private Operario[] operariosPorFase;
+        private Vehiculo vehiculo;
+        private int indiceFaseActual;
+        private int segundosRestantesFase;
+        private boolean finalizado;
+
+        public ProcesoActivo(CadenaMontaje cadena, Chasis chasis, Motor motor,
+                             Tapiceria tapiceria, Rueda rueda, Operario[] operariosPorFase)
+        {
+            this.cadena = cadena;
+            this.chasis = chasis;
+            this.motor = motor;
+            this.tapiceria = tapiceria;
+            this.rueda = rueda;
+            this.operariosPorFase = operariosPorFase;
+            this.indiceFaseActual = 0;
+            this.segundosRestantesFase = operariosPorFase[0].calcularTiempoMontaje();
+            this.finalizado = false;
+        }
+
+        public CadenaMontaje getCadena()
+        {
+            return cadena;
+        }
+
+        public Vehiculo getVehiculo()
+        {
+            return vehiculo;
+        }
+
+        public Operario getOperarioActual()
+        {
+            return operariosPorFase[indiceFaseActual];
+        }
+
+        public String getNombreFaseActual()
+        {
+            return FASES[indiceFaseActual];
+        }
+
+        public int getSegundosRestantesFase()
+        {
+            return segundosRestantesFase;
+        }
+
+        public boolean estaFinalizado()
+        {
+            return finalizado;
+        }
+
+        public boolean consumirSegundoDeTrabajo()
+        {
+            segundosRestantesFase--;
+            return segundosRestantesFase <= 0;
+        }
+
+        public void ejecutarFaseActual()
+        {
+            Operario operario = getOperarioActual();
+
+            if (indiceFaseActual == 0) {
+                vehiculo = cadena.iniciarMontaje(chasis);
+            }
+            else if (indiceFaseActual == 1) {
+                cadena.montarMotorEnVehiculo(vehiculo, motor);
+            }
+            else if (indiceFaseActual == 2) {
+                cadena.montarTapiceriaEnVehiculo(vehiculo, tapiceria);
+            }
+            else if (indiceFaseActual == 3) {
+                cadena.montarRuedasEnVehiculo(vehiculo, rueda);
+            }
+
+            operario.registrarPiezaMontada();
+
+            if (indiceFaseActual == FASES.length - 1) {
+                finalizado = true;
+            }
+            else {
+                indiceFaseActual++;
+                segundosRestantesFase = operariosPorFase[indiceFaseActual].calcularTiempoMontaje();
+            }
+        }
     }
 
     private String describirTipoOperario(Operario operario)

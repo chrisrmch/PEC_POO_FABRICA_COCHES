@@ -137,13 +137,13 @@ public class FabricaCoches
                                                pedido.getUnidadesPendientes());
     }
 
-    public LoteMontaje prepararLoteMontaje(CadenaMontaje cadena, String codigoChasis,
-                                           String codigoMotor, String codigoTapiceria,
-                                           String codigoRueda)
+    public boolean puedePrepararMontaje(CadenaMontaje cadena, String codigoChasis,
+                                        String codigoMotor, String codigoTapiceria,
+                                        String codigoRueda)
     {
         if (cadena == null || !almacen.hayStockParaFabricacion(codigoChasis, codigoMotor,
                                                                codigoTapiceria, codigoRueda)) {
-            return null;
+            return false;
         }
 
         Componente componenteChasis = almacen.buscarComponentePorCodigo(codigoChasis);
@@ -155,43 +155,72 @@ public class FabricaCoches
             || !(componenteMotor instanceof Motor)
             || !(componenteTapiceria instanceof Tapiceria)
             || !(componenteRueda instanceof Rueda)) {
-            return null;
+            return false;
         }
 
         Chasis chasisStock = (Chasis) componenteChasis;
-        if (!chasisStock.esCompatibleCon(cadena.getEspecialidad())) {
-            return null;
-        }
+        return chasisStock.esCompatibleCon(cadena.getEspecialidad());
+    }
 
+    public Chasis prepararChasisParaMontaje(String codigoChasis, String codigoCadena)
+    {
         Chasis chasis = almacen.retirarChasis(codigoChasis);
-        Motor motor = almacen.retirarMotor(codigoMotor);
-        Tapiceria tapiceria = almacen.retirarTapiceria(codigoTapiceria);
-        Rueda rueda = almacen.retirarRueda(codigoRueda);
-
-        if (chasis == null || motor == null || tapiceria == null || rueda == null) {
+        if (chasis == null) {
             return null;
         }
+        prepararComponenteParaMontaje(chasis, codigoCadena);
+        return chasis;
+    }
 
-        prepararComponenteParaMontaje(chasis, cadena.getCodigo());
-        prepararComponenteParaMontaje(motor, cadena.getCodigo());
-        prepararComponenteParaMontaje(tapiceria, cadena.getCodigo());
-        prepararComponenteParaMontaje(rueda, cadena.getCodigo());
+    public Motor prepararMotorParaMontaje(String codigoMotor, String codigoCadena)
+    {
+        Motor motor = almacen.retirarMotor(codigoMotor);
+        if (motor == null) {
+            return null;
+        }
+        prepararComponenteParaMontaje(motor, codigoCadena);
+        return motor;
+    }
 
-        return new LoteMontaje(chasis, motor, tapiceria, rueda);
+    public Tapiceria prepararTapiceriaParaMontaje(String codigoTapiceria, String codigoCadena)
+    {
+        Tapiceria tapiceria = almacen.retirarTapiceria(codigoTapiceria);
+        if (tapiceria == null) {
+            return null;
+        }
+        prepararComponenteParaMontaje(tapiceria, codigoCadena);
+        return tapiceria;
+    }
+
+    public Rueda prepararRuedaParaMontaje(String codigoRueda, String codigoCadena)
+    {
+        Rueda rueda = almacen.retirarRueda(codigoRueda);
+        if (rueda == null) {
+            return null;
+        }
+        prepararComponenteParaMontaje(rueda, codigoCadena);
+        return rueda;
     }
 
     public Vehiculo fabricarVehiculoDesdeAlmacen(CadenaMontaje cadena, String codigoChasis,
                                                  String codigoMotor, String codigoTapiceria,
                                                  String codigoRueda)
     {
-        LoteMontaje loteMontaje = prepararLoteMontaje(cadena, codigoChasis, codigoMotor,
-                                                      codigoTapiceria, codigoRueda);
-        if (loteMontaje == null) {
+        if (!puedePrepararMontaje(cadena, codigoChasis, codigoMotor, codigoTapiceria,
+                                  codigoRueda)) {
             return null;
         }
 
-        Vehiculo vehiculo = cadena.fabricaVehiculo(loteMontaje.getChasis(), loteMontaje.getMotor(),
-                                                   loteMontaje.getTapiceria(), loteMontaje.getRueda());
+        Chasis chasis = prepararChasisParaMontaje(codigoChasis, cadena.getCodigo());
+        Motor motor = prepararMotorParaMontaje(codigoMotor, cadena.getCodigo());
+        Tapiceria tapiceria = prepararTapiceriaParaMontaje(codigoTapiceria, cadena.getCodigo());
+        Rueda rueda = prepararRuedaParaMontaje(codigoRueda, cadena.getCodigo());
+
+        if (chasis == null || motor == null || tapiceria == null || rueda == null) {
+            return null;
+        }
+
+        Vehiculo vehiculo = cadena.fabricaVehiculo(chasis, motor, tapiceria, rueda);
         if (vehiculo != null) {
             registrarVehiculoMontado(vehiculo);
         }
@@ -221,15 +250,21 @@ public class FabricaCoches
         }
 
         CadenaMontaje cadena = obtenerCadenaParaTipoVehiculo(vehiculo.getTipoVehiculo());
-        LoteMontaje loteMontaje = prepararLoteMontaje(cadena, codigoChasis, codigoMotor,
-                                                      codigoTapiceria, codigoRueda);
-        if (loteMontaje == null) {
+        if (!puedePrepararMontaje(cadena, codigoChasis, codigoMotor, codigoTapiceria,
+                                  codigoRueda)) {
             return false;
         }
 
-        return almacen.actualizarVehiculo(codigoVehiculo, loteMontaje.getChasis(),
-                                          loteMontaje.getMotor(), loteMontaje.getTapiceria(),
-                                          loteMontaje.getRueda());
+        Chasis chasis = prepararChasisParaMontaje(codigoChasis, cadena.getCodigo());
+        Motor motor = prepararMotorParaMontaje(codigoMotor, cadena.getCodigo());
+        Tapiceria tapiceria = prepararTapiceriaParaMontaje(codigoTapiceria, cadena.getCodigo());
+        Rueda rueda = prepararRuedaParaMontaje(codigoRueda, cadena.getCodigo());
+
+        if (chasis == null || motor == null || tapiceria == null || rueda == null) {
+            return false;
+        }
+
+        return almacen.actualizarVehiculo(codigoVehiculo, chasis, motor, tapiceria, rueda);
     }
 
     public void registrarVehiculoMontado(Vehiculo vehiculo)

@@ -2,6 +2,7 @@
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -46,8 +47,9 @@ public class AlmacenFabrica
 
     public Componente buscarComponentePorCodigo(String codigo)
     {
-        for (int i = 0; i < componentes.size(); i++) {
-            Componente componente = componentes.get(i);
+        Iterator<Componente> iterador = componentes.iterator();
+        while (iterador.hasNext()) {
+            Componente componente = iterador.next();
             if (componente.getCodigo().equalsIgnoreCase(codigo)) {
                 return componente;
             }
@@ -57,8 +59,9 @@ public class AlmacenFabrica
 
     public Vehiculo buscarVehiculoPorCodigo(String codigoVehiculo)
     {
-        for (int i = 0; i < vehiculos.size(); i++) {
-            Vehiculo vehiculo = vehiculos.get(i);
+        Iterator<Vehiculo> iterador = vehiculos.iterator();
+        while (iterador.hasNext()) {
+            Vehiculo vehiculo = iterador.next();
             if (vehiculo.getCodigoVehiculo().equalsIgnoreCase(codigoVehiculo)) {
                 return vehiculo;
             }
@@ -240,8 +243,9 @@ public class AlmacenFabrica
             return null;
         }
 
-        for (int i = 0; i < pedidosProduccion.size(); i++) {
-            PedidoProduccionSimple pedido = pedidosProduccion.get(i);
+        Iterator<PedidoProduccionSimple> iterador = pedidosProduccion.iterator();
+        while (iterador.hasNext()) {
+            PedidoProduccionSimple pedido = iterador.next();
             if (pedido.getCodigoPedido().equalsIgnoreCase(codigoPedido)) {
                 return pedido;
             }
@@ -259,8 +263,9 @@ public class AlmacenFabrica
         List<Componente> coincidencias = new ArrayList<Componente>();
         String nombreNormalizado = nombreComponente.toLowerCase();
 
-        for (int i = 0; i < componentes.size(); i++) {
-            Componente componente = componentes.get(i);
+        Iterator<Componente> iterador = componentes.iterator();
+        while (iterador.hasNext()) {
+            Componente componente = iterador.next();
             if (componente.getNombreComponente().toLowerCase().contains(nombreNormalizado)) {
                 coincidencias.add(componente);
             }
@@ -280,8 +285,9 @@ public class AlmacenFabrica
             return null;
         }
 
-        for (int i = 0; i < stockVehiculos.size(); i++) {
-            StockVehiculo stock = stockVehiculos.get(i);
+        Iterator<StockVehiculo> iterador = stockVehiculos.iterator();
+        while (iterador.hasNext()) {
+            StockVehiculo stock = iterador.next();
             if (stock.getTipoVehiculo().equalsIgnoreCase(tipoVehiculo)) {
                 return stock;
             }
@@ -299,8 +305,9 @@ public class AlmacenFabrica
         List<Vehiculo> coincidencias = new ArrayList<Vehiculo>();
         String tipoNormalizado = tipoVehiculo.toLowerCase();
 
-        for (int i = 0; i < vehiculos.size(); i++) {
-            Vehiculo vehiculo = vehiculos.get(i);
+        Iterator<Vehiculo> iterador = vehiculos.iterator();
+        while (iterador.hasNext()) {
+            Vehiculo vehiculo = iterador.next();
             if (vehiculo.getTipoVehiculo().toLowerCase().contains(tipoNormalizado)) {
                 coincidencias.add(vehiculo);
             }
@@ -322,8 +329,9 @@ public class AlmacenFabrica
     public int getTotalStockVehiculos()
     {
         int total = 0;
-        for (int i = 0; i < stockVehiculos.size(); i++) {
-            total += stockVehiculos.get(i).getUnidadesDisponibles();
+        Iterator<StockVehiculo> iterador = stockVehiculos.iterator();
+        while (iterador.hasNext()) {
+            total += iterador.next().getUnidadesDisponibles();
         }
         return total;
     }

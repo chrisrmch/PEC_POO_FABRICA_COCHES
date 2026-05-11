@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DashboardEstado implements Observador
+public class DashboardEstado implements Observer
 {
     private List<String> eventos;
 
@@ -13,13 +13,13 @@ public class DashboardEstado implements Observador
         this.eventos = new ArrayList<String>();
     }
 
-    public void actualizar(Sujeto sujeto)
+    public void actualizar(Observable observable)
     {
-        if (sujeto instanceof CadenaMontaje) {
-            registrarEventoCadena((CadenaMontaje) sujeto);
+        if (observable instanceof CadenaMontaje) {
+            registrarEventoCadena((CadenaMontaje) observable);
         }
-        else if (sujeto instanceof Componente) {
-            registrarEventoComponente((Componente) sujeto);
+        else if (observable instanceof Componente) {
+            registrarEventoComponente((Componente) observable);
         }
     }
 

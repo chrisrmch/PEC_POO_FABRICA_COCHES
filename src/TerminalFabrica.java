@@ -1,5 +1,7 @@
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class TerminalFabrica
@@ -15,9 +17,14 @@ public class TerminalFabrica
 
     public void iniciar()
     {
-        System.out.println("Sistema de gestion de fabrica de vehiculos");
-        System.out.println(fabrica.describirOrganizacion());
-        mostrarMenuPrincipal();
+        try {
+            System.out.println("Sistema de gestion de fabrica de vehiculos");
+            System.out.println(fabrica.describirOrganizacion());
+            mostrarMenuPrincipal();
+        }
+        catch (IllegalStateException e) {
+            System.out.println("La terminal se ha cerrado porque no hay entrada disponible: " + e.getMessage());
+        }
     }
 
     private void mostrarMenuPrincipal()
@@ -274,27 +281,30 @@ public class TerminalFabrica
         while (agregarMas) {
             CadenaMontaje cadena = seleccionarCadena();
             System.out.println("Configurando pedido para " + cadena.getCodigo() + " (" + cadena.getEspecialidad() + ")");
-            String codigoChasis = leerTexto("Codigo de chasis: ");
-            String codigoMotor = leerTexto("Codigo de motor: ");
-            String codigoTapiceria = leerTexto("Codigo de tapiceria: ");
-            String codigoRueda = leerTexto("Codigo de rueda: ");
-            int unidades = leerEntero("Numero de unidades: ");
+            String codigoChasis = leerCodigo("Codigo de chasis: ");
+            String codigoMotor = leerCodigo("Codigo de motor: ");
+            String codigoTapiceria = leerCodigo("Codigo de tapiceria: ");
+            String codigoRueda = leerCodigo("Codigo de rueda: ");
+            int unidades = leerEnteroPositivo("Numero de unidades: ");
 
             pedidos.add(new PedidoProduccionSimple(
                 cadena, codigoChasis, codigoMotor, codigoTapiceria, codigoRueda, unidades
             ));
 
-            String respuesta = leerTexto("Desea anadir otro pedido? (s/n): ");
+            String respuesta = leerSiNo("Desea anadir otro pedido? (s/n): ");
             agregarMas = respuesta.equalsIgnoreCase("s");
         }
 
-        PlanificadorSimple planificador = new PlanificadorSimple(fabrica);
-        List<String> bitacora = planificador.ejecutar(pedidos);
+        try {
+            PlanificadorSimple planificador = new PlanificadorSimple(fabrica);
+            List<String> bitacora = planificador.ejecutar(pedidos);
 
-        System.out.println();
-        System.out.println("Ejecucion del planificador simple");
-        for (int i = 0; i < bitacora.size(); i++) {
-            System.out.println(bitacora.get(i));
+            System.out.println();
+            System.out.println("Ejecucion del planificador simple");
+            imprimirLineas(bitacora);
+        }
+        catch (RuntimeException e) {
+            System.out.println("No se ha podido ejecutar el planificador simple: " + e.getMessage());
         }
     }
 
@@ -337,40 +347,40 @@ public class TerminalFabrica
         Componente componente = null;
 
         if (opcion == 1) {
-            String codigo = leerTexto("Codigo: ");
-            String tipoVehiculo = leerTexto("Tipo de vehiculo compatible: ");
-            String color = leerTexto("Color: ");
-            int plazas = leerEntero("Numero de plazas: ");
-            double tara = leerDouble("Tara: ");
-            double pesoMaximo = leerDouble("Peso maximo autorizado: ");
-            int unidades = leerEntero("Unidades disponibles: ");
+            String codigo = leerCodigo("Codigo: ");
+            String tipoVehiculo = seleccionarTipoVehiculo();
+            String color = leerNombre("Color: ");
+            int plazas = leerEnteroPositivo("Numero de plazas: ");
+            double tara = leerDoublePositivo("Tara: ");
+            double pesoMaximo = leerDoublePositivo("Peso maximo autorizado: ");
+            int unidades = leerEnteroNoNegativo("Unidades disponibles: ");
             componente = new Chasis(codigo, tipoVehiculo, color, plazas, tara, pesoMaximo, unidades);
         }
         else if (opcion == 2) {
-            String codigo = leerTexto("Codigo: ");
+            String codigo = leerCodigo("Codigo: ");
             TipoMotor tipoMotor = seleccionarTipoMotor();
-            int cilindrada = leerEntero("Cilindrada: ");
-            int potencia = leerEntero("Potencia: ");
-            short cilindros = (short) leerEntero("Numero de cilindros: ");
-            int unidades = leerEntero("Unidades disponibles: ");
+            int cilindrada = leerEnteroNoNegativo("Cilindrada: ");
+            int potencia = leerEnteroPositivo("Potencia: ");
+            short cilindros = (short) leerEnteroNoNegativo("Numero de cilindros: ");
+            int unidades = leerEnteroNoNegativo("Unidades disponibles: ");
             componente = new Motor(codigo, tipoMotor, cilindrada, potencia, cilindros, unidades);
         }
         else if (opcion == 3) {
-            String codigo = leerTexto("Codigo: ");
+            String codigo = leerCodigo("Codigo: ");
             TipoTapiceria tipoTapiceria = seleccionarTipoTapiceria();
-            String color = leerTexto("Color: ");
-            float metros = leerFloat("Metros cuadrados: ");
-            int unidades = leerEntero("Unidades disponibles: ");
+            String color = leerNombre("Color: ");
+            float metros = leerFloatPositivo("Metros cuadrados: ");
+            int unidades = leerEnteroNoNegativo("Unidades disponibles: ");
             componente = new Tapiceria(codigo, tipoTapiceria, color, metros, unidades);
         }
         else if (opcion == 4) {
-            String codigo = leerTexto("Codigo: ");
+            String codigo = leerCodigo("Codigo: ");
             TipoRueda tipoRueda = seleccionarTipoRueda();
-            float ancho = leerFloat("Ancho mm: ");
-            float diametro = leerFloat("Diametro de llanta: ");
-            float carga = leerFloat("Indice de carga kg: ");
-            float velocidad = leerFloat("Codigo de velocidad km/h: ");
-            int unidades = leerEntero("Unidades disponibles: ");
+            float ancho = leerFloatPositivo("Ancho mm: ");
+            float diametro = leerFloatPositivo("Diametro de llanta: ");
+            float carga = leerFloatPositivo("Indice de carga kg: ");
+            float velocidad = leerFloatPositivo("Codigo de velocidad km/h: ");
+            int unidades = leerEnteroNoNegativo("Unidades disponibles: ");
             componente = new Rueda(codigo, tipoRueda, ancho, diametro, carga, velocidad, unidades);
         }
 
@@ -385,7 +395,7 @@ public class TerminalFabrica
 
     private void buscarComponente()
     {
-        String codigo = leerTexto("Codigo del componente: ");
+        String codigo = leerCodigo("Codigo del componente: ");
         Componente componente = fabrica.buscarComponentePorCodigo(codigo);
 
         if (componente == null) {
@@ -398,8 +408,8 @@ public class TerminalFabrica
 
     private void actualizarStockComponente()
     {
-        String codigo = leerTexto("Codigo del componente: ");
-        int unidades = leerEntero("Nuevo stock: ");
+        String codigo = leerCodigo("Codigo del componente: ");
+        int unidades = leerEnteroNoNegativo("Nuevo stock: ");
 
         if (fabrica.actualizarStockComponente(codigo, unidades)) {
             System.out.println("Stock actualizado correctamente.");
@@ -430,18 +440,18 @@ public class TerminalFabrica
         System.out.println("4. Mecanico de cinta");
 
         int opcion = leerEntero("Seleccione el tipo: ");
-        String nombre = leerTexto("Nombre: ");
-        String apellidos = leerTexto("Apellidos: ");
-        String dni = leerTexto("DNI: ");
+        String nombre = leerNombre("Nombre: ");
+        String apellidos = leerNombre("Apellidos: ");
+        String dni = leerDni("DNI: ");
         String direccion = leerTexto("Direccion: ");
-        String numeroSeguridadSocial = leerTexto("Numero de seguridad social: ");
-        double salario = leerDouble("Salario: ");
-        String fechaIngreso = leerTexto("Fecha de ingreso: ");
+        String numeroSeguridadSocial = leerCodigo("Numero de seguridad social: ");
+        double salario = leerDoubleNoNegativo("Salario: ");
+        String fechaIngreso = leerFecha("Fecha de ingreso (aaaa-mm-dd): ");
         Trabajador trabajador = null;
 
         if (opcion == 1) {
             TipoTrabajador tipo = seleccionarTipoTrabajador();
-            int piezasMontadas = leerEntero("Piezas montadas: ");
+            int piezasMontadas = leerEnteroNoNegativo("Piezas montadas: ");
             trabajador = new Operario(nombre, apellidos, dni, direccion,
                                       numeroSeguridadSocial, salario, fechaIngreso,
                                       tipo, piezasMontadas);
@@ -456,7 +466,7 @@ public class TerminalFabrica
         }
         else if (opcion == 4) {
             TipoTrabajador tipo = seleccionarTipoTrabajador();
-            int reparaciones = leerEntero("Reparaciones realizadas: ");
+            int reparaciones = leerEnteroNoNegativo("Reparaciones realizadas: ");
             trabajador = new MecanicoCinta(nombre, apellidos, dni, direccion,
                                            numeroSeguridadSocial, salario, fechaIngreso,
                                            tipo, reparaciones);
@@ -477,7 +487,7 @@ public class TerminalFabrica
 
     private void buscarTrabajadorPorDni()
     {
-        String dni = leerTexto("DNI del trabajador: ");
+        String dni = leerDni("DNI del trabajador: ");
         Trabajador trabajador = fabrica.identificarTrabajadorPorDni(dni);
 
         if (trabajador == null) {
@@ -490,19 +500,19 @@ public class TerminalFabrica
 
     private void buscarTrabajadorPorNombre()
     {
-        String texto = leerTexto("Texto a buscar en nombre o apellidos: ");
+        String texto = leerNombre("Texto a buscar en nombre o apellidos: ");
         listarTrabajadores(fabrica.buscarTrabajadoresPorNombreOApellido(texto));
     }
 
     private void buscarTrabajadorPorPuesto()
     {
-        String texto = leerTexto("Puesto a buscar: ");
+        String texto = leerNombre("Puesto a buscar: ");
         listarTrabajadores(fabrica.buscarTrabajadoresPorPuesto(texto));
     }
 
     private void actualizarDireccionTrabajador()
     {
-        String dni = leerTexto("DNI del trabajador: ");
+        String dni = leerDni("DNI del trabajador: ");
         String direccion = leerTexto("Nueva direccion: ");
 
         if (fabrica.actualizarDireccionTrabajador(dni, direccion)) {
@@ -515,8 +525,8 @@ public class TerminalFabrica
 
     private void actualizarSalarioTrabajador()
     {
-        String dni = leerTexto("DNI del trabajador: ");
-        double salario = leerDouble("Nuevo salario: ");
+        String dni = leerDni("DNI del trabajador: ");
+        double salario = leerDoubleNoNegativo("Nuevo salario: ");
 
         if (fabrica.actualizarSalarioTrabajador(dni, salario)) {
             System.out.println("Salario actualizado correctamente.");
@@ -540,7 +550,7 @@ public class TerminalFabrica
 
     private void buscarVehiculoPorCodigo()
     {
-        String codigo = leerTexto("Codigo del vehiculo: ");
+        String codigo = leerCodigo("Codigo del vehiculo: ");
         Vehiculo vehiculo = fabrica.buscarVehiculoPorCodigo(codigo);
 
         if (vehiculo == null) {
@@ -553,17 +563,17 @@ public class TerminalFabrica
 
     private void buscarVehiculosPorTipo()
     {
-        String tipo = leerTexto("Tipo de vehiculo: ");
+        String tipo = seleccionarTipoVehiculo();
         listarVehiculos(fabrica.buscarVehiculosPorTipo(tipo));
     }
 
     private void actualizarVehiculoDesdeStock()
     {
-        String codigoVehiculo = leerTexto("Codigo del vehiculo a actualizar: ");
-        String codigoChasis = leerTexto("Nuevo codigo de chasis: ");
-        String codigoMotor = leerTexto("Nuevo codigo de motor: ");
-        String codigoTapiceria = leerTexto("Nuevo codigo de tapiceria: ");
-        String codigoRueda = leerTexto("Nuevo codigo de rueda: ");
+        String codigoVehiculo = leerCodigo("Codigo del vehiculo a actualizar: ");
+        String codigoChasis = leerCodigo("Nuevo codigo de chasis: ");
+        String codigoMotor = leerCodigo("Nuevo codigo de motor: ");
+        String codigoTapiceria = leerCodigo("Nuevo codigo de tapiceria: ");
+        String codigoRueda = leerCodigo("Nuevo codigo de rueda: ");
 
         if (fabrica.actualizarVehiculoRegistradoDesdeStock(
             codigoVehiculo, codigoChasis, codigoMotor, codigoTapiceria, codigoRueda
@@ -605,7 +615,7 @@ public class TerminalFabrica
     private void actualizarStockVehiculo()
     {
         String tipoVehiculo = seleccionarTipoVehiculo();
-        int unidades = leerEntero("Nuevo stock de vehiculos: ");
+        int unidades = leerEnteroNoNegativo("Nuevo stock de vehiculos: ");
 
         if (fabrica.actualizarStockVehiculo(tipoVehiculo, unidades)) {
             System.out.println("Stock de vehiculos actualizado correctamente.");
@@ -631,7 +641,7 @@ public class TerminalFabrica
 
     private void altaPedidoProduccion()
     {
-        String codigoPedido = leerTexto("Codigo del pedido: ");
+        String codigoPedido = leerCodigo("Codigo del pedido: ");
         PedidoProduccionSimple pedido = leerDatosPedidoProduccion(codigoPedido);
 
         if (fabrica.registrarPedidoProduccion(pedido)) {
@@ -645,7 +655,7 @@ public class TerminalFabrica
 
     private void buscarPedidoProduccion()
     {
-        String codigoPedido = leerTexto("Codigo del pedido: ");
+        String codigoPedido = leerCodigo("Codigo del pedido: ");
         PedidoProduccionSimple pedido = fabrica.buscarPedidoProduccionPorCodigo(codigoPedido);
 
         if (pedido == null) {
@@ -658,7 +668,7 @@ public class TerminalFabrica
 
     private void actualizarPedidoProduccion()
     {
-        String codigoPedido = leerTexto("Codigo del pedido a actualizar: ");
+        String codigoPedido = leerCodigo("Codigo del pedido a actualizar: ");
         PedidoProduccionSimple pedidoActualizado = leerDatosPedidoProduccion(codigoPedido);
 
         if (fabrica.actualizarPedidoProduccion(codigoPedido, pedidoActualizado.getCadena(),
@@ -679,11 +689,11 @@ public class TerminalFabrica
     {
         CadenaMontaje cadena = seleccionarCadena();
         System.out.println("Configurando pedido para " + cadena.getCodigo() + " (" + cadena.getEspecialidad() + ")");
-        String codigoChasis = leerTexto("Codigo de chasis: ");
-        String codigoMotor = leerTexto("Codigo de motor: ");
-        String codigoTapiceria = leerTexto("Codigo de tapiceria: ");
-        String codigoRueda = leerTexto("Codigo de rueda: ");
-        int unidades = leerEntero("Unidades a producir: ");
+        String codigoChasis = leerCodigo("Codigo de chasis: ");
+        String codigoMotor = leerCodigo("Codigo de motor: ");
+        String codigoTapiceria = leerCodigo("Codigo de tapiceria: ");
+        String codigoRueda = leerCodigo("Codigo de rueda: ");
+        int unidades = leerEnteroPositivo("Unidades a producir: ");
 
         return new PedidoProduccionSimple(codigoPedido, cadena, codigoChasis, codigoMotor,
                                           codigoTapiceria, codigoRueda, unidades);
@@ -705,13 +715,24 @@ public class TerminalFabrica
             return;
         }
 
-        PlanificadorSimple planificador = new PlanificadorSimple(fabrica);
-        List<String> bitacora = planificador.ejecutar(pedidos);
+        try {
+            PlanificadorSimple planificador = new PlanificadorSimple(fabrica);
+            List<String> bitacora = planificador.ejecutar(pedidos);
 
-        System.out.println();
-        System.out.println("Ejecucion de pedidos almacenados");
-        for (int i = 0; i < bitacora.size(); i++) {
-            System.out.println(bitacora.get(i));
+            System.out.println();
+            System.out.println("Ejecucion de pedidos almacenados");
+            imprimirLineas(bitacora);
+        }
+        catch (RuntimeException e) {
+            System.out.println("No se han podido ejecutar los pedidos almacenados: " + e.getMessage());
+        }
+    }
+
+    private void imprimirLineas(List<String> lineas)
+    {
+        Iterator<String> iterador = lineas.iterator();
+        while (iterador.hasNext()) {
+            System.out.println(iterador.next());
         }
     }
 
@@ -811,11 +832,76 @@ public class TerminalFabrica
         return TipoTrabajador.ESTANDAR;
     }
 
+    private String leerDni(String mensaje)
+    {
+        while (true) {
+            System.out.print(mensaje);
+            String dni = leerLineaScanner().toUpperCase();
+
+            if (esDniValido(dni)) {
+                return dni;
+            }
+            System.out.println("Formato de DNI no valido. Use 8 numeros y una letra, por ejemplo 12345678A.");
+        }
+    }
+
+    private String leerNombre(String mensaje)
+    {
+        while (true) {
+            System.out.print(mensaje);
+            String nombre = normalizarEspacios(leerLineaScanner());
+
+            if (esNombreValido(nombre)) {
+                return nombre;
+            }
+            System.out.println("Formato no valido. Use solo letras, espacios o guiones.");
+        }
+    }
+
+    private String leerCodigo(String mensaje)
+    {
+        while (true) {
+            System.out.print(mensaje);
+            String codigo = leerLineaScanner().toUpperCase();
+
+            if (esCodigoValido(codigo)) {
+                return codigo;
+            }
+            System.out.println("Formato no valido. Use letras, numeros, guiones o guiones bajos, sin espacios.");
+        }
+    }
+
+    private String leerFecha(String mensaje)
+    {
+        while (true) {
+            System.out.print(mensaje);
+            String fecha = leerLineaScanner();
+
+            if (esFechaValida(fecha)) {
+                return fecha;
+            }
+            System.out.println("Formato de fecha no valido. Use aaaa-mm-dd.");
+        }
+    }
+
+    private String leerSiNo(String mensaje)
+    {
+        while (true) {
+            System.out.print(mensaje);
+            String respuesta = leerLineaScanner().toLowerCase();
+
+            if (respuesta.equals("s") || respuesta.equals("n")) {
+                return respuesta;
+            }
+            System.out.println("Debe responder s o n.");
+        }
+    }
+
     private int leerEntero(String mensaje)
     {
         while (true) {
             System.out.print(mensaje);
-            String linea = scanner.nextLine().trim();
+            String linea = leerLineaScanner();
 
             try {
                 return Integer.parseInt(linea);
@@ -826,11 +912,33 @@ public class TerminalFabrica
         }
     }
 
+    private int leerEnteroNoNegativo(String mensaje)
+    {
+        while (true) {
+            int valor = leerEntero(mensaje);
+            if (valor >= 0) {
+                return valor;
+            }
+            System.out.println("Debe introducir un numero mayor o igual que cero.");
+        }
+    }
+
+    private int leerEnteroPositivo(String mensaje)
+    {
+        while (true) {
+            int valor = leerEntero(mensaje);
+            if (valor > 0) {
+                return valor;
+            }
+            System.out.println("Debe introducir un numero mayor que cero.");
+        }
+    }
+
     private double leerDouble(String mensaje)
     {
         while (true) {
             System.out.print(mensaje);
-            String linea = scanner.nextLine().trim();
+            String linea = leerLineaScanner();
 
             try {
                 return Double.parseDouble(linea);
@@ -841,11 +949,33 @@ public class TerminalFabrica
         }
     }
 
+    private double leerDoubleNoNegativo(String mensaje)
+    {
+        while (true) {
+            double valor = leerDouble(mensaje);
+            if (valor >= 0.0) {
+                return valor;
+            }
+            System.out.println("Debe introducir un numero mayor o igual que cero.");
+        }
+    }
+
+    private double leerDoublePositivo(String mensaje)
+    {
+        while (true) {
+            double valor = leerDouble(mensaje);
+            if (valor > 0.0) {
+                return valor;
+            }
+            System.out.println("Debe introducir un numero mayor que cero.");
+        }
+    }
+
     private float leerFloat(String mensaje)
     {
         while (true) {
             System.out.print(mensaje);
-            String linea = scanner.nextLine().trim();
+            String linea = leerLineaScanner();
 
             try {
                 return Float.parseFloat(linea);
@@ -853,6 +983,17 @@ public class TerminalFabrica
             catch (NumberFormatException e) {
                 System.out.println("Debe introducir un numero valido.");
             }
+        }
+    }
+
+    private float leerFloatPositivo(String mensaje)
+    {
+        while (true) {
+            float valor = leerFloat(mensaje);
+            if (valor > 0.0f) {
+                return valor;
+            }
+            System.out.println("Debe introducir un numero mayor que cero.");
         }
     }
 
@@ -864,14 +1005,148 @@ public class TerminalFabrica
 
     private String leerTextoNoVacio()
     {
-        String texto = scanner.nextLine().trim();
+        String texto = leerLineaScanner();
 
         while (texto.length() == 0) {
             System.out.print("El valor no puede estar vacio. Introduzca de nuevo: ");
-            texto = scanner.nextLine().trim();
+            texto = leerLineaScanner();
         }
 
         return texto;
+    }
+
+    private boolean esDniValido(String dni)
+    {
+        if (dni == null || dni.length() != 9) {
+            return false;
+        }
+
+        for (int i = 0; i < 8; i++) {
+            if (!Character.isDigit(dni.charAt(i))) {
+                return false;
+            }
+        }
+
+        return Character.isLetter(dni.charAt(8));
+    }
+
+    private boolean esNombreValido(String texto)
+    {
+        if (texto == null || texto.length() == 0) {
+            return false;
+        }
+
+        boolean contieneLetra = false;
+        for (int i = 0; i < texto.length(); i++) {
+            char caracter = texto.charAt(i);
+            if (Character.isLetter(caracter)) {
+                contieneLetra = true;
+            }
+            else if (caracter != ' ' && caracter != '-') {
+                return false;
+            }
+        }
+
+        return contieneLetra;
+    }
+
+    private boolean esCodigoValido(String codigo)
+    {
+        if (codigo == null || codigo.length() == 0) {
+            return false;
+        }
+
+        for (int i = 0; i < codigo.length(); i++) {
+            char caracter = codigo.charAt(i);
+            if (!Character.isLetterOrDigit(caracter) && caracter != '-' && caracter != '_') {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean esFechaValida(String fecha)
+    {
+        if (fecha == null || fecha.length() != 10
+            || fecha.charAt(4) != '-' || fecha.charAt(7) != '-') {
+            return false;
+        }
+
+        for (int i = 0; i < fecha.length(); i++) {
+            if (i != 4 && i != 7 && !Character.isDigit(fecha.charAt(i))) {
+                return false;
+            }
+        }
+
+        try {
+            int anio = Integer.parseInt(fecha.substring(0, 4));
+            int mes = Integer.parseInt(fecha.substring(5, 7));
+            int dia = Integer.parseInt(fecha.substring(8, 10));
+
+            if (anio < 1900 || mes < 1 || mes > 12 || dia < 1) {
+                return false;
+            }
+
+            return dia <= diasDelMes(mes, anio);
+        }
+        catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private int diasDelMes(int mes, int anio)
+    {
+        if (mes == 2) {
+            if (esBisiesto(anio)) {
+                return 29;
+            }
+            return 28;
+        }
+        if (mes == 4 || mes == 6 || mes == 9 || mes == 11) {
+            return 30;
+        }
+        return 31;
+    }
+
+    private boolean esBisiesto(int anio)
+    {
+        return (anio % 4 == 0 && anio % 100 != 0) || anio % 400 == 0;
+    }
+
+    private String normalizarEspacios(String texto)
+    {
+        String normalizado = "";
+        boolean espacioAnterior = false;
+
+        for (int i = 0; i < texto.length(); i++) {
+            char caracter = texto.charAt(i);
+            if (caracter == ' ') {
+                if (!espacioAnterior && normalizado.length() > 0) {
+                    normalizado += caracter;
+                }
+                espacioAnterior = true;
+            }
+            else {
+                normalizado += caracter;
+                espacioAnterior = false;
+            }
+        }
+
+        return normalizado.trim();
+    }
+
+    private String leerLineaScanner()
+    {
+        try {
+            return scanner.nextLine().trim();
+        }
+        catch (NoSuchElementException e) {
+            throw new IllegalStateException("no quedan lineas por leer", e);
+        }
+        catch (IllegalStateException e) {
+            throw new IllegalStateException("el lector de entrada esta cerrado", e);
+        }
     }
 
     private String describirComponente(Componente componente)

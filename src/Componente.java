@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public abstract class Componente implements Sujeto
+public abstract class Componente implements Observable
 {
     private String codigo;
     private String nombreComponente;
     private int unidadesDisponibles;
     private EstadoComponente estado;
     private String referenciaEstado;
-    private List<Observador> observadores;
+    private List<Observer> observadores;
 
     public Componente(String codigo, String nombreComponente, int unidadesDisponibles)
     {
@@ -22,7 +22,7 @@ public abstract class Componente implements Sujeto
                       ? EstadoComponente.EN_ALMACEN
                       : EstadoComponente.SIN_STOCK;
         this.referenciaEstado = "Alta en almacen";
-        this.observadores = new ArrayList<Observador>();
+        this.observadores = new ArrayList<Observer>();
     }
 
     public String getCodigo()
@@ -124,16 +124,16 @@ public abstract class Componente implements Sujeto
         notificarObservadores();
     }
 
-    public void registrarObservador(Observador observador)
+    public void registrarObservador(Observer observer)
     {
-        if (observador != null && !observadores.contains(observador)) {
-            observadores.add(observador);
+        if (observer != null && !observadores.contains(observer)) {
+            observadores.add(observer);
         }
     }
 
-    public void eliminarObservador(Observador observador)
+    public void eliminarObservador(Observer observer)
     {
-        observadores.remove(observador);
+        observadores.remove(observer);
     }
 
     public void notificarObservadores()
