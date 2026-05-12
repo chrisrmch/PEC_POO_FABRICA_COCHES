@@ -3,17 +3,33 @@ import java.util.List;
 import java.util.Random;
 
 
+/**
+ * Ejecuta pedidos de produccion simulando el avance segundo a segundo.
+ *
+ * @author cmamani11
+ */
 public class PlanificadorSimple
 {
     private FabricaCoches fabrica;
     private Random random;
 
+    /**
+     * Crea un planificador asociado a una fabrica.
+     *
+     * @param fabrica fabrica sobre la que se ejecutaran los pedidos.
+     */
     public PlanificadorSimple(FabricaCoches fabrica)
     {
         this.fabrica = fabrica;
         this.random = new Random();
     }
 
+    /**
+     * Ejecuta una lista de pedidos y genera una bitacora de eventos.
+     *
+     * @param pedidos pedidos que se desean planificar.
+     * @return bitacora textual de la ejecucion.
+     */
     public List<String> ejecutar(List<PedidoProduccionSimple> pedidos)
     {
         List<String> bitacora = new ArrayList<String>();
@@ -75,6 +91,14 @@ public class PlanificadorSimple
         return bitacora;
     }
 
+    /**
+     * Inicia nuevos procesos cuando hay stock, cadena libre y pedido pendiente.
+     *
+     * @param pedidos pedidos pendientes.
+     * @param procesosActivos procesos actualmente en ejecucion.
+     * @param operariosDisponibles operarios que pueden asignarse.
+     * @param bitacora registro textual de la simulacion.
+     */
     private void iniciarProcesosDisponibles(List<PedidoProduccionSimple> pedidos,
                                             List<ProcesoActivo> procesosActivos,
                                             List<Operario> operariosDisponibles,
@@ -119,6 +143,12 @@ public class PlanificadorSimple
         }
     }
 
+    /**
+     * Selecciona aleatoriamente un operario para cada fase del proceso.
+     *
+     * @param operariosDisponibles operarios disponibles.
+     * @return array de operarios asignados a fases.
+     */
     private Operario[] seleccionarOperariosAleatorios(List<Operario> operariosDisponibles)
     {
         Operario[] operarios = new Operario[4];
@@ -131,6 +161,12 @@ public class PlanificadorSimple
         return operarios;
     }
 
+    /**
+     * Comprueba si queda algun pedido con unidades pendientes.
+     *
+     * @param pedidos pedidos que se revisan.
+     * @return true si al menos un pedido sigue pendiente.
+     */
     private boolean hayPedidosPendientes(List<PedidoProduccionSimple> pedidos)
     {
         for (int i = 0; i < pedidos.size(); i++) {
@@ -141,6 +177,13 @@ public class PlanificadorSimple
         return false;
     }
 
+    /**
+     * Comprueba si una cadena ya tiene un proceso activo.
+     *
+     * @param procesosActivos procesos actualmente iniciados.
+     * @param pedido pedido que se desea iniciar.
+     * @return true si la cadena del pedido esta ocupada.
+     */
     private boolean existeProcesoActivoParaCadena(List<ProcesoActivo> procesosActivos,
                                                   PedidoProduccionSimple pedido)
     {
@@ -152,6 +195,11 @@ public class PlanificadorSimple
         return false;
     }
 
+    /**
+     * Estado interno de un vehiculo que se esta fabricando.
+     *
+     * @author cmamani11
+     */
     private class ProcesoActivo
     {
         private static final String[] FASES = {"Chasis", "Motor", "Tapiceria", "Ruedas"};
@@ -167,6 +215,16 @@ public class PlanificadorSimple
         private int segundosRestantesFase;
         private boolean finalizado;
 
+        /**
+         * Crea un proceso activo con componentes y operarios asignados.
+         *
+         * @param cadena cadena que ejecuta el montaje.
+         * @param chasis chasis reservado.
+         * @param motor motor reservado.
+         * @param tapiceria tapiceria reservada.
+         * @param rueda rueda reservada.
+         * @param operariosPorFase operarios asignados a cada fase.
+         */
         public ProcesoActivo(CadenaMontaje cadena, Chasis chasis, Motor motor,
                              Tapiceria tapiceria, Rueda rueda, Operario[] operariosPorFase)
         {
@@ -181,42 +239,80 @@ public class PlanificadorSimple
             this.finalizado = false;
         }
 
+        /**
+         * Devuelve la cadena asignada al proceso.
+         *
+         * @return cadena de montaje.
+         */
         public CadenaMontaje getCadena()
         {
             return cadena;
         }
 
+        /**
+         * Devuelve el vehiculo generado por el proceso.
+         *
+         * @return vehiculo en montaje.
+         */
         public Vehiculo getVehiculo()
         {
             return vehiculo;
         }
 
+        /**
+         * Devuelve el operario asignado a la fase actual.
+         *
+         * @return operario actual.
+         */
         public Operario getOperarioActual()
         {
             return operariosPorFase[indiceFaseActual];
         }
 
+        /**
+         * Devuelve el nombre de la fase actual.
+         *
+         * @return nombre de fase.
+         */
         public String getNombreFaseActual()
         {
             return FASES[indiceFaseActual];
         }
 
+        /**
+         * Devuelve los segundos restantes de la fase actual.
+         *
+         * @return segundos restantes.
+         */
         public int getSegundosRestantesFase()
         {
             return segundosRestantesFase;
         }
 
+        /**
+         * Indica si el montaje del vehiculo ha terminado.
+         *
+         * @return true si el proceso esta finalizado.
+         */
         public boolean estaFinalizado()
         {
             return finalizado;
         }
 
+        /**
+         * Consume un segundo de trabajo de la fase actual.
+         *
+         * @return true si la fase queda terminada.
+         */
         public boolean consumirSegundoDeTrabajo()
         {
             segundosRestantesFase--;
             return segundosRestantesFase <= 0;
         }
 
+        /**
+         * Ejecuta la instalacion correspondiente a la fase actual.
+         */
         public void ejecutarFaseActual()
         {
             Operario operario = getOperarioActual();
@@ -246,6 +342,12 @@ public class PlanificadorSimple
         }
     }
 
+    /**
+     * Describe el rendimiento efectivo de un operario.
+     *
+     * @param operario operario que se evalua.
+     * @return texto con el tipo efectivo.
+     */
     private String describirTipoOperario(Operario operario)
     {
         if (operario.getTipoTrabajador() == TipoTrabajador.EFICIENTE || operario.getPiezasMontadas() > 10) {

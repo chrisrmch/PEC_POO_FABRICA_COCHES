@@ -1,8 +1,18 @@
 
 import java.util.Scanner;
 
-public class FabricaMain
+/**
+ * Punto de entrada de la aplicacion de gestion de fabrica.
+ *
+ * @author cmamani11
+ */
+public class factoy_main
 {
+    /**
+     * Inicializa el sistema y abre la terminal de usuario.
+     *
+     * @param args argumentos de ejecucion.
+     */
     public static void main(String[] args)
     {
         FabricaCoches fabrica = crearSistemaFabrica();
@@ -11,6 +21,11 @@ public class FabricaMain
         terminal.iniciar();
     }
 
+    /**
+     * Crea las cadenas, responsables y datos iniciales de la fabrica.
+     *
+     * @return fabrica inicializada.
+     */
     private static FabricaCoches crearSistemaFabrica()
     {
         CadenaMontaje deportiva = new CadenaMontajeDeportivo("CAD-DEP-01");
@@ -36,6 +51,11 @@ public class FabricaMain
         return fabrica;
     }
 
+    /**
+     * Registra trabajadores de ejemplo en la fabrica.
+     *
+     * @param fabrica fabrica donde se registran los trabajadores.
+     */
     private static void registrarTrabajadores(FabricaCoches fabrica)
     {
         fabrica.registrarTrabajador(
@@ -65,6 +85,11 @@ public class FabricaMain
         );
     }
 
+    /**
+     * Registra componentes de ejemplo en el almacen.
+     *
+     * @param fabrica fabrica donde se registran los componentes.
+     */
     private static void registrarComponentes(FabricaCoches fabrica)
     {
         fabrica.registrarComponenteEnAlmacen(

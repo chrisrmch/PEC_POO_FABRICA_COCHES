@@ -4,15 +4,28 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Registra eventos producidos por cadenas de montaje y componentes.
+ *
+ * @author cmamani11
+ */
 public class DashboardEstado implements Observer
 {
     private List<String> eventos;
 
+    /**
+     * Crea un dashboard sin eventos iniciales.
+     */
     public DashboardEstado()
     {
         this.eventos = new ArrayList<String>();
     }
 
+    /**
+     * Recibe cambios de objetos observables y los transforma en eventos.
+     *
+     * @param observable objeto que ha publicado el cambio.
+     */
     public void actualizar(Observable observable)
     {
         if (observable instanceof CadenaMontaje) {
@@ -23,6 +36,11 @@ public class DashboardEstado implements Observer
         }
     }
 
+    /**
+     * Registra un evento asociado a una cadena de montaje.
+     *
+     * @param cadena cadena que ha cambiado de fase.
+     */
     private void registrarEventoCadena(CadenaMontaje cadena)
     {
         Vehiculo vehiculo = cadena.getVehiculoActual();
@@ -37,6 +55,11 @@ public class DashboardEstado implements Observer
         eventos.add(evento);
     }
 
+    /**
+     * Registra un evento asociado al estado de un componente.
+     *
+     * @param componente componente que ha cambiado de estado.
+     */
     private void registrarEventoComponente(Componente componente)
     {
         String evento = "Componente " + componente.getNombreComponente()
@@ -47,11 +70,21 @@ public class DashboardEstado implements Observer
         eventos.add(evento);
     }
 
+    /**
+     * Devuelve los eventos registrados.
+     *
+     * @return lista no modificable de eventos.
+     */
     public List<String> getEventos()
     {
         return Collections.unmodifiableList(eventos);
     }
 
+    /**
+     * Devuelve el ultimo evento registrado.
+     *
+     * @return ultimo evento o mensaje por defecto.
+     */
     public String getUltimoEvento()
     {
         if (eventos.isEmpty()) {

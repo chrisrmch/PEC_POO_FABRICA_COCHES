@@ -4,17 +4,31 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
+/**
+ * Interfaz de consola para operar la fabrica y sus opciones de gestion.
+ *
+ * @author cmamani11
+ */
 public class TerminalFabrica
 {
     private FabricaCoches fabrica;
     private Scanner scanner;
 
+    /**
+     * Crea una terminal asociada a una fabrica y a un lector de entrada.
+     *
+     * @param fabrica fabrica que se gestionara desde la terminal.
+     * @param scanner lector de entrada de usuario.
+     */
     public TerminalFabrica(FabricaCoches fabrica, Scanner scanner)
     {
         this.fabrica = fabrica;
         this.scanner = scanner;
     }
 
+    /**
+     * Inicia la terminal y muestra el menu principal.
+     */
     public void iniciar()
     {
         try {
@@ -27,6 +41,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Muestra el menu principal y distribuye la navegacion.
+     */
     private void mostrarMenuPrincipal()
     {
         boolean salir = false;
@@ -77,6 +94,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Muestra los eventos registrados en el dashboard.
+     */
     private void mostrarDashboard()
     {
         List<String> eventos = fabrica.getDashboard().getEventos();
@@ -93,6 +113,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Gestiona las opciones de almacen de componentes.
+     */
     private void menuAlmacen()
     {
         boolean volver = false;
@@ -131,6 +154,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Gestiona las opciones de trabajadores.
+     */
     private void menuTrabajadores()
     {
         boolean volver = false;
@@ -181,6 +207,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Gestiona las consultas y actualizaciones de vehiculos.
+     */
     private void menuVehiculos()
     {
         boolean volver = false;
@@ -231,6 +260,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Gestiona el alta, consulta y ejecucion de pedidos de produccion.
+     */
     private void menuPedidosProduccion()
     {
         boolean volver = false;
@@ -273,6 +305,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Permite construir pedidos temporales y ejecutarlos con el planificador.
+     */
     private void ejecutarPlanificadorSimple()
     {
         List<PedidoProduccionSimple> pedidos = new ArrayList<PedidoProduccionSimple>();
@@ -308,6 +343,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Muestra un resumen general del estado del sistema.
+     */
     private void mostrarResumenSistema()
     {
         System.out.println();
@@ -321,6 +359,9 @@ public class TerminalFabrica
         System.out.println("Ultimo evento dashboard: " + fabrica.getDashboard().getUltimoEvento());
     }
 
+    /**
+     * Lista todos los componentes del almacen.
+     */
     private void listarComponentes()
     {
         List<Componente> componentes = fabrica.getComponentes();
@@ -335,6 +376,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Solicita datos y registra un componente nuevo.
+     */
     private void altaComponente()
     {
         System.out.println("Tipo de componente");
@@ -393,6 +437,9 @@ public class TerminalFabrica
         System.out.println("Componente registrado correctamente.");
     }
 
+    /**
+     * Busca y muestra un componente por codigo.
+     */
     private void buscarComponente()
     {
         String codigo = leerCodigo("Codigo del componente: ");
@@ -406,6 +453,9 @@ public class TerminalFabrica
         System.out.println(describirComponente(componente));
     }
 
+    /**
+     * Solicita un nuevo valor de stock para un componente.
+     */
     private void actualizarStockComponente()
     {
         String codigo = leerCodigo("Codigo del componente: ");
@@ -419,6 +469,11 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Imprime una lista de trabajadores.
+     *
+     * @param trabajadores trabajadores que se desean mostrar.
+     */
     private void listarTrabajadores(List<Trabajador> trabajadores)
     {
         if (trabajadores.isEmpty()) {
@@ -431,6 +486,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Solicita datos y registra un trabajador nuevo.
+     */
     private void altaTrabajador()
     {
         System.out.println("Tipo de trabajador");
@@ -485,6 +543,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Busca y muestra un trabajador por DNI.
+     */
     private void buscarTrabajadorPorDni()
     {
         String dni = leerDni("DNI del trabajador: ");
@@ -498,18 +559,27 @@ public class TerminalFabrica
         System.out.println(describirTrabajador(trabajador));
     }
 
+    /**
+     * Busca trabajadores por nombre o apellidos.
+     */
     private void buscarTrabajadorPorNombre()
     {
         String texto = leerNombre("Texto a buscar en nombre o apellidos: ");
         listarTrabajadores(fabrica.buscarTrabajadoresPorNombreOApellido(texto));
     }
 
+    /**
+     * Busca trabajadores por puesto.
+     */
     private void buscarTrabajadorPorPuesto()
     {
         String texto = leerNombre("Puesto a buscar: ");
         listarTrabajadores(fabrica.buscarTrabajadoresPorPuesto(texto));
     }
 
+    /**
+     * Solicita una nueva direccion para un trabajador.
+     */
     private void actualizarDireccionTrabajador()
     {
         String dni = leerDni("DNI del trabajador: ");
@@ -523,6 +593,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Solicita un nuevo salario para un trabajador.
+     */
     private void actualizarSalarioTrabajador()
     {
         String dni = leerDni("DNI del trabajador: ");
@@ -536,6 +609,11 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Imprime una lista de vehiculos.
+     *
+     * @param vehiculos vehiculos que se desean mostrar.
+     */
     private void listarVehiculos(List<Vehiculo> vehiculos)
     {
         if (vehiculos.isEmpty()) {
@@ -548,6 +626,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Busca y muestra un vehiculo por codigo.
+     */
     private void buscarVehiculoPorCodigo()
     {
         String codigo = leerCodigo("Codigo del vehiculo: ");
@@ -561,12 +642,18 @@ public class TerminalFabrica
         System.out.println(describirVehiculo(vehiculo));
     }
 
+    /**
+     * Busca vehiculos por tipo seleccionado.
+     */
     private void buscarVehiculosPorTipo()
     {
         String tipo = seleccionarTipoVehiculo();
         listarVehiculos(fabrica.buscarVehiculosPorTipo(tipo));
     }
 
+    /**
+     * Actualiza un vehiculo existente con componentes retirados de stock.
+     */
     private void actualizarVehiculoDesdeStock()
     {
         String codigoVehiculo = leerCodigo("Codigo del vehiculo a actualizar: ");
@@ -585,6 +672,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lista los registros de stock de vehiculos terminados.
+     */
     private void listarStockVehiculos()
     {
         List<StockVehiculo> stockVehiculos = fabrica.getStockVehiculos();
@@ -599,6 +689,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Busca el stock disponible de un tipo de vehiculo.
+     */
     private void buscarStockVehiculoPorTipo()
     {
         String tipoVehiculo = seleccionarTipoVehiculo();
@@ -612,6 +705,9 @@ public class TerminalFabrica
         System.out.println(describirStockVehiculo(stock));
     }
 
+    /**
+     * Actualiza el stock agregado de un tipo de vehiculo.
+     */
     private void actualizarStockVehiculo()
     {
         String tipoVehiculo = seleccionarTipoVehiculo();
@@ -625,6 +721,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lista los pedidos de produccion registrados.
+     */
     private void listarPedidosProduccion()
     {
         List<PedidoProduccionSimple> pedidos = fabrica.getPedidosProduccion();
@@ -639,6 +738,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Solicita datos y registra un pedido de produccion.
+     */
     private void altaPedidoProduccion()
     {
         String codigoPedido = leerCodigo("Codigo del pedido: ");
@@ -653,6 +755,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Busca y muestra un pedido de produccion por codigo.
+     */
     private void buscarPedidoProduccion()
     {
         String codigoPedido = leerCodigo("Codigo del pedido: ");
@@ -666,6 +771,9 @@ public class TerminalFabrica
         System.out.println(describirPedidoProduccion(pedido));
     }
 
+    /**
+     * Solicita datos y actualiza un pedido de produccion existente.
+     */
     private void actualizarPedidoProduccion()
     {
         String codigoPedido = leerCodigo("Codigo del pedido a actualizar: ");
@@ -685,6 +793,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee desde consola la configuracion completa de un pedido.
+     *
+     * @param codigoPedido codigo que se asignara al pedido.
+     * @return pedido construido con los datos introducidos.
+     */
     private PedidoProduccionSimple leerDatosPedidoProduccion(String codigoPedido)
     {
         CadenaMontaje cadena = seleccionarCadena();
@@ -699,6 +813,11 @@ public class TerminalFabrica
                                           codigoTapiceria, codigoRueda, unidades);
     }
 
+    /**
+     * Muestra un aviso cuando el stock no cubre el pedido indicado.
+     *
+     * @param pedido pedido que se comprueba.
+     */
     private void avisarSiNoHayStockSuficiente(PedidoProduccionSimple pedido)
     {
         if (!fabrica.hayStockParaPedidoProduccion(pedido)) {
@@ -706,6 +825,9 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Ejecuta los pedidos guardados usando el planificador simple.
+     */
     private void ejecutarPedidosProduccionAlmacenados()
     {
         List<PedidoProduccionSimple> pedidos = new ArrayList<PedidoProduccionSimple>(fabrica.getPedidosProduccion());
@@ -728,6 +850,11 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Imprime una coleccion de lineas de texto.
+     *
+     * @param lineas lineas que se desean imprimir.
+     */
     private void imprimirLineas(List<String> lineas)
     {
         Iterator<String> iterador = lineas.iterator();
@@ -736,6 +863,11 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Solicita al usuario una cadena de montaje.
+     *
+     * @return cadena seleccionada.
+     */
     private CadenaMontaje seleccionarCadena()
     {
         System.out.println("Seleccione la cadena");
@@ -754,6 +886,11 @@ public class TerminalFabrica
         return fabrica.getCadenaFurgoneta();
     }
 
+    /**
+     * Solicita al usuario un tipo de vehiculo.
+     *
+     * @return texto del tipo seleccionado.
+     */
     private String seleccionarTipoVehiculo()
     {
         System.out.println("Tipo de vehiculo");
@@ -772,6 +909,11 @@ public class TerminalFabrica
         return "Furgoneta";
     }
 
+    /**
+     * Solicita al usuario un tipo de motor.
+     *
+     * @return tipo de motor seleccionado.
+     */
     private TipoMotor seleccionarTipoMotor()
     {
         System.out.println("1. ELECTRICO");
@@ -788,6 +930,11 @@ public class TerminalFabrica
         return TipoMotor.HIBRIDO;
     }
 
+    /**
+     * Solicita al usuario un tipo de tapiceria.
+     *
+     * @return tipo de tapiceria seleccionado.
+     */
     private TipoTapiceria seleccionarTipoTapiceria()
     {
         System.out.println("1. TELA");
@@ -804,6 +951,11 @@ public class TerminalFabrica
         return TipoTapiceria.ALCANTARA;
     }
 
+    /**
+     * Solicita al usuario un tipo de rueda.
+     *
+     * @return tipo de rueda seleccionado.
+     */
     private TipoRueda seleccionarTipoRueda()
     {
         System.out.println("1. NORMAL");
@@ -820,6 +972,11 @@ public class TerminalFabrica
         return TipoRueda.TODOTERRENO;
     }
 
+    /**
+     * Solicita al usuario un tipo de trabajador.
+     *
+     * @return tipo de trabajador seleccionado.
+     */
     private TipoTrabajador seleccionarTipoTrabajador()
     {
         System.out.println("1. EFICIENTE");
@@ -832,6 +989,12 @@ public class TerminalFabrica
         return TipoTrabajador.ESTANDAR;
     }
 
+    /**
+     * Lee un DNI valido desde consola.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return DNI validado.
+     */
     private String leerDni(String mensaje)
     {
         while (true) {
@@ -845,6 +1008,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un texto de nombre validado.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return nombre validado.
+     */
     private String leerNombre(String mensaje)
     {
         while (true) {
@@ -858,6 +1027,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un codigo sin espacios y con caracteres permitidos.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return codigo validado.
+     */
     private String leerCodigo(String mensaje)
     {
         while (true) {
@@ -871,6 +1046,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee una fecha con formato aaaa-mm-dd.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return fecha validada.
+     */
     private String leerFecha(String mensaje)
     {
         while (true) {
@@ -884,6 +1065,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee una respuesta afirmativa o negativa.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return respuesta s o n.
+     */
     private String leerSiNo(String mensaje)
     {
         while (true) {
@@ -897,6 +1084,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un numero entero desde consola.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return entero introducido.
+     */
     private int leerEntero(String mensaje)
     {
         while (true) {
@@ -912,6 +1105,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un entero mayor o igual que cero.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return entero no negativo.
+     */
     private int leerEnteroNoNegativo(String mensaje)
     {
         while (true) {
@@ -923,6 +1122,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un entero estrictamente positivo.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return entero positivo.
+     */
     private int leerEnteroPositivo(String mensaje)
     {
         while (true) {
@@ -934,6 +1139,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un numero decimal double desde consola.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return valor decimal.
+     */
     private double leerDouble(String mensaje)
     {
         while (true) {
@@ -949,6 +1160,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un double mayor o igual que cero.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return double no negativo.
+     */
     private double leerDoubleNoNegativo(String mensaje)
     {
         while (true) {
@@ -960,6 +1177,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un double estrictamente positivo.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return double positivo.
+     */
     private double leerDoublePositivo(String mensaje)
     {
         while (true) {
@@ -971,6 +1194,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un numero decimal float desde consola.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return valor float.
+     */
     private float leerFloat(String mensaje)
     {
         while (true) {
@@ -986,6 +1215,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee un float estrictamente positivo.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return float positivo.
+     */
     private float leerFloatPositivo(String mensaje)
     {
         while (true) {
@@ -997,12 +1232,23 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Lee texto no vacio desde consola.
+     *
+     * @param mensaje mensaje mostrado al usuario.
+     * @return texto introducido.
+     */
     private String leerTexto(String mensaje)
     {
         System.out.print(mensaje);
         return leerTextoNoVacio();
     }
 
+    /**
+     * Repite la lectura hasta obtener texto no vacio.
+     *
+     * @return texto no vacio.
+     */
     private String leerTextoNoVacio()
     {
         String texto = leerLineaScanner();
@@ -1015,6 +1261,12 @@ public class TerminalFabrica
         return texto;
     }
 
+    /**
+     * Valida el formato basico de un DNI.
+     *
+     * @param dni DNI que se desea validar.
+     * @return true si cumple el formato.
+     */
     private boolean esDniValido(String dni)
     {
         if (dni == null || dni.length() != 9) {
@@ -1030,6 +1282,12 @@ public class TerminalFabrica
         return Character.isLetter(dni.charAt(8));
     }
 
+    /**
+     * Valida que un texto contenga letras y caracteres de nombre permitidos.
+     *
+     * @param texto texto que se desea validar.
+     * @return true si el nombre es valido.
+     */
     private boolean esNombreValido(String texto)
     {
         if (texto == null || texto.length() == 0) {
@@ -1050,6 +1308,12 @@ public class TerminalFabrica
         return contieneLetra;
     }
 
+    /**
+     * Valida que un codigo no este vacio y use caracteres permitidos.
+     *
+     * @param codigo codigo que se desea validar.
+     * @return true si el codigo es valido.
+     */
     private boolean esCodigoValido(String codigo)
     {
         if (codigo == null || codigo.length() == 0) {
@@ -1066,6 +1330,12 @@ public class TerminalFabrica
         return true;
     }
 
+    /**
+     * Valida una fecha con formato aaaa-mm-dd y dia real de calendario.
+     *
+     * @param fecha fecha que se desea validar.
+     * @return true si la fecha es valida.
+     */
     private boolean esFechaValida(String fecha)
     {
         if (fecha == null || fecha.length() != 10
@@ -1095,6 +1365,13 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Calcula los dias de un mes considerando anos bisiestos.
+     *
+     * @param mes mes que se evalua.
+     * @param anio ano que se evalua.
+     * @return dias del mes.
+     */
     private int diasDelMes(int mes, int anio)
     {
         if (mes == 2) {
@@ -1109,11 +1386,23 @@ public class TerminalFabrica
         return 31;
     }
 
+    /**
+     * Comprueba si un ano es bisiesto.
+     *
+     * @param anio ano que se evalua.
+     * @return true si es bisiesto.
+     */
     private boolean esBisiesto(int anio)
     {
         return (anio % 4 == 0 && anio % 100 != 0) || anio % 400 == 0;
     }
 
+    /**
+     * Elimina espacios duplicados y recorta el texto.
+     *
+     * @param texto texto que se normaliza.
+     * @return texto normalizado.
+     */
     private String normalizarEspacios(String texto)
     {
         String normalizado = "";
@@ -1136,6 +1425,11 @@ public class TerminalFabrica
         return normalizado.trim();
     }
 
+    /**
+     * Lee una linea del scanner controlando cierres o fin de entrada.
+     *
+     * @return linea leida sin espacios extremos.
+     */
     private String leerLineaScanner()
     {
         try {
@@ -1149,6 +1443,12 @@ public class TerminalFabrica
         }
     }
 
+    /**
+     * Construye una descripcion de un componente segun su subtipo.
+     *
+     * @param componente componente que se describe.
+     * @return descripcion textual del componente.
+     */
     private String describirComponente(Componente componente)
     {
         String descripcion = componente.getNombreComponente()
@@ -1181,6 +1481,12 @@ public class TerminalFabrica
         return descripcion;
     }
 
+    /**
+     * Construye una descripcion breve de un vehiculo.
+     *
+     * @param vehiculo vehiculo que se describe.
+     * @return descripcion textual del vehiculo.
+     */
     private String describirVehiculo(Vehiculo vehiculo)
     {
         return vehiculo.getCodigoVehiculo()
@@ -1190,12 +1496,24 @@ public class TerminalFabrica
                + " | estado=" + vehiculo.getDescripcionEstadoMontaje();
     }
 
+    /**
+     * Construye una descripcion del stock de vehiculos.
+     *
+     * @param stock registro de stock.
+     * @return descripcion textual del stock.
+     */
     private String describirStockVehiculo(StockVehiculo stock)
     {
         return stock.getTipoVehiculo()
                + " | unidades disponibles=" + stock.getUnidadesDisponibles();
     }
 
+    /**
+     * Construye una descripcion de pedido con informacion de stock.
+     *
+     * @param pedido pedido que se describe.
+     * @return descripcion textual del pedido.
+     */
     private String describirPedidoProduccion(PedidoProduccionSimple pedido)
     {
         String descripcion = pedido.getDescripcionPedido();
@@ -1208,6 +1526,12 @@ public class TerminalFabrica
         return descripcion;
     }
 
+    /**
+     * Construye una descripcion de trabajador segun su subtipo.
+     *
+     * @param trabajador trabajador que se describe.
+     * @return descripcion textual del trabajador.
+     */
     private String describirTrabajador(Trabajador trabajador)
     {
         String descripcion = trabajador.getNombreCompleto()
